@@ -175,13 +175,6 @@ public class Graph {
                 else cSec++;
 
             return cFirst * cSec == edgesNumber;
-
-//            for (int i = 0; i < verticesNumber; i++)
-//                if (bipartiteColor[i]) {
-//                    if (getVertexDeg(i) != cSec) return false;
-//                } else if (getVertexDeg(i) != cFirst) return false;
-//
-//            return true;
         }
         return false;
     }
