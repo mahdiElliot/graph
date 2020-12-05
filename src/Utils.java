@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class Utils {
     public static void printMatrix(int[][] m) {
@@ -35,5 +37,45 @@ public final class Utils {
             if (!l2.contains(l)) return false;
 
         return true;
+    }
+
+    static int fact(int n){
+        if (n == 1 || n == 0)
+            return 1;
+        return n * fact(n-1);
+    }
+
+    static ArrayList<ArrayList<Integer>> subsets(int n, int filterSubsetSize){
+        ArrayList<ArrayList<Integer>> arr = new ArrayList<>();
+        for (int i = 1; i < (1<<n); i++) {
+            ArrayList<Integer> a = new ArrayList<>();
+            // Print current subset
+            for (int j = 0; j < n; j++)
+                // (1<<j) is a number with jth bit 1
+                // so when we 'and' them with the
+                // subset number we get which numbers
+                // are present in the subset and which
+                // are not
+                if ((i & (1 << j)) > 0)
+                    a.add(j);
+
+            if (a.size() > filterSubsetSize)  arr.add(a);
+        }
+        return arr;
+    }
+
+    static ArrayList<ArrayList<Edge>> subsets(ArrayList<Edge> set, int filterSubsetSize){
+        ArrayList<ArrayList<Edge>> arr = new ArrayList<>();
+        int n = set.size();
+        for (int i = 0; i < (1 << n); i++){
+            ArrayList<Edge> s = new ArrayList<>();
+            for (int j = 0; j < n; j++)
+                if ((i & (1 << j)) > 0)
+                    s.add(set.get(j));
+
+            if (s.size() > filterSubsetSize) arr.add(s);
+        }
+
+        return arr;
     }
 }

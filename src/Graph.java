@@ -45,8 +45,7 @@ public class Graph {
     }
 
     public int[][] getIncidentMatrix(){
-        int edges = edgesNumber;
-        int[][] incident = new int[verticesNumber][edges];
+        int[][] incident = new int[verticesNumber][edgesNumber];
         int col = 0;
         if (isDirected()){
             for (int i = 0; i < verticesNumber; i++)
@@ -123,12 +122,13 @@ public class Graph {
 
         return sum;
     }
+
     private int getEdgesNumber(int [][] a){
         int sum = 0;
         if (isDirected()){
-            for (int i = 0; i < a.length; i++)
+            for (int[] v : a)
                 for (int j = 0; j < a.length; j++)
-                    sum += a[i][j];
+                    sum += v[j];
         }
         else
             for (int i = 0; i < a.length - 1; i++)
@@ -156,9 +156,47 @@ public class Graph {
             s += " bipartite";
         if (isCompleteBipartite())
             s += " complete_bipartite";
-
+        if (isPath())
+            s += " path";
         return s;
     }
+
+
+    private boolean isPath(){
+        if (verticesNumber == 1 && edgesNumber == 0) return true;
+        if (isDirected()){
+            if (verticesNumber == 2 && edgesNumber == 1 &&
+                    ((adj[0][1] == 1 && adj[1][0] == 0) || (adj[0][1] == 0 && adj[1][0] == 1))) return true;
+            if (isSimple() && !containsCycle(adj)){
+                int number = 0;
+                boolean end = false;
+                for (int i = 0; i < verticesNumber; i++){
+                    int d = getVertexDeg(i);
+                    if (d == 1) number++;
+                    else if (d == 0) end = true;
+                    else return false;
+                }
+                return end && number == verticesNumber - 1;
+            }
+        }
+        else {
+            if (verticesNumber == 2 && edgesNumber == 1 && adj[0][1] == 1 && adj[1][0] == 1) return true;
+            if (isSimple() && isConnected() && !containsCycle(adj)){
+                short numberOfEndpoints = 0;
+                for (int i = 0; i < verticesNumber; i++){
+                    int d = getVertexDeg(i);
+                    if (d == 1)
+                        numberOfEndpoints++;
+                    else if (d > 2)
+                        return false;
+                    if (numberOfEndpoints > 2) return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public boolean isDirected(){
         for (int i = 0; i < verticesNumber - 1; i++)
@@ -166,6 +204,7 @@ public class Graph {
                 if (adj[i][j] != adj[j][i]) return true;
         return false;
     }
+
     private boolean isCompleteBipartite() {
         if (isSimple() && isConnected() && isBipartite()) {
             int cFirst = 0;
@@ -175,6 +214,19 @@ public class Graph {
                 else cSec++;
 
             return cFirst * cSec == edgesNumber;
+        }
+        return false;
+    }
+
+    private boolean isCompleteRegularBipartite(){
+        if (isSimple() && isConnected() && isBipartite()) {
+            int cFirst = 0;
+            int cSec = 0;
+            for (int i = 0; i < verticesNumber; i++)
+                if (bipartiteColor[i]) cFirst++;
+                else cSec++;
+
+            return cFirst * cSec == edgesNumber && cFirst == cSec;
         }
         return false;
     }
@@ -326,21 +378,6 @@ public class Graph {
         return true;
     }
 
-    private int[][] newIsomorphism(int first, int sec) {
-        int [][] m = Utils.copyMatrix(adj);
-        for (int i = 0; i < verticesNumber; i++){
-            int temp = m[first][i];
-            m[first][i] = m[sec][i];
-            m[sec][i] = temp;
-        }
-        for (int i = 0; i < verticesNumber; i++){
-            int temp = m[i][first];
-            m[i][first] = m[i][sec];
-            m[i][sec] = temp;
-        }
-        return m;
-    }
-
     private int[][] newIsomorphism(int [][] a ,int first, int sec) {
         int [][] m = Utils.copyMatrix(a);
         for (int i = 0; i < verticesNumber; i++){
@@ -409,6 +446,17 @@ public class Graph {
         return true;
     }
 
+    private Set<Edge> edgeSet(){
+        Set<Edge> edges = new HashSet<>();
+        for (int i = 0; i < verticesNumber; i++)
+            for (int j = 0; j < verticesNumber; j++)
+                if (adj[i][j] > 0){
+                    Edge e = new Edge(i, j);
+                    edges.add(e);
+                }
+        return edges;
+    }
+
     public boolean compareGraphs(int[][] a) {
         for (int i = 0; i < verticesNumber; i++)
             for (int j = 0; j < verticesNumber; j++)
@@ -418,13 +466,23 @@ public class Graph {
 
     private boolean isCycle() {
         if (verticesNumber == 1 && adj[0][0] == 2) return true;
-        if (verticesNumber == 2 && adj[0][1] == 2 && adj[1][0] == 2) return true;
-
-        if (isSimple() && isConnected()) {
-            for (int i = 0; i < verticesNumber; i++)
-                if (getVertexDeg(i) != 2)
-                    return false;
-            return true;
+        if (isDirected()){
+            if (verticesNumber == 2 && edgesNumber == 2 && adj[0][1] == 1 && adj[1][0] == 1) return true;
+            if (isSimple()){
+                for (int i = 0; i < verticesNumber; i++)
+                    if (getVertexDeg(i) != 1)
+                        return false;
+                return true;
+            }
+        }
+        else{
+            if (verticesNumber == 2 && edgesNumber == 2 && adj[0][1] == 2 && adj[1][0] == 2) return true;
+            if (isSimple() && isConnected()) {
+                for (int i = 0; i < verticesNumber; i++)
+                    if (getVertexDeg(i) != 2)
+                        return false;
+                return true;
+            }
         }
         return false;
     }
@@ -695,4 +753,101 @@ public class Graph {
         return true;
     }
 
+    public int maxMatchingNumber(){ //alpha prime
+        if (isPath() || isCycle() || (verticesNumber % 2 == 0 && isComplete()))
+            return verticesNumber / 2;
+        if (isBipartite())
+            if (isRegular())
+                return verticesNumber / 2;
+            else
+                return minVertexCover();
+
+        ArrayList<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < verticesNumber; i++)
+            if (getVertexDeg(i) == 0) indices.add(i);
+        if (!indices.isEmpty()) {
+            Graph g = removeSingleVertices(indices);
+            return g.verticesNumber - g.minEdgeCover();
+        }
+
+        return verticesNumber - minEdgeCover();
+    }
+
+    private Graph removeSingleVertices(ArrayList<Integer> indices) {
+        int l = verticesNumber - indices.size();
+        int [][] a = new int[l][l];
+        int count = 0;
+        int counter = 0;
+        for (int i = 0; i < verticesNumber; i++) {
+            int count1 = 0;
+            int counter1 = 0;
+            if (i == indices.get(counter)){
+                counter++;
+                continue;
+            }
+            for (int j = 0; j < verticesNumber; j++)
+                if (j == indices.get(counter1)) {
+                    a[count][count1] = adj[i][j];
+                    count1++;
+                }
+                else counter1++;
+
+            count++;
+        }
+        return new Graph(a);
+    }
+
+
+    public int minEdgeCover(){ //beta prime
+        for (int i = 0; i < verticesNumber; i++)
+            if (getVertexDeg(i) == 0) return 0;
+
+        ArrayList<Edge> edges = new ArrayList<>(edgeSet());
+        ArrayList<ArrayList<Edge>> subsets = Utils.subsets(edges, 1);
+        for (ArrayList<Edge> es: subsets){
+            boolean [] check = new boolean[verticesNumber];
+            for (Edge e: es){
+                check[e.getFirst()] = true;
+                check[e.getDestination()] = true;
+            }
+            boolean checkAll = false;
+            for (int i = 0; i < verticesNumber; i++) {
+                if (!check[i]){
+                    checkAll = false;
+                    break;
+                }
+                checkAll = check[i];
+            }
+            if (checkAll) return es.size();
+        }
+        return 1;
+    }
+    public int maxIndependentSet(){ //alpha
+        if (isComplete())
+            return 1;
+        if (isPath() || isCycle() || isCompleteBipartite())
+            return verticesNumber / 2;
+
+        ArrayList<ArrayList<Integer>> subsets = Utils.subsets(verticesNumber, 1);
+        int max = 1;
+        for (ArrayList<Integer> s : subsets){
+            boolean isIndependent = true;
+            for (int i = 0; i < s.size(); i++) {
+                for (int j = i + 1; j < s.size(); j++)
+                    if (adj[s.get(i)][s.get(j)] != 0) {
+                        isIndependent = false;
+                        break;
+                    }
+                if (!isIndependent) break;
+            }
+            if (isIndependent)
+                if (s.size() > max) max = s.size();
+        }
+
+        return max;
+    }
+
+    public int minVertexCover(){ //beta
+        return verticesNumber - maxIndependentSet();
+    }
 }
