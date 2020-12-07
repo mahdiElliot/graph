@@ -1,3 +1,5 @@
+import jdk.jshell.execution.Util;
+
 import java.util.*;
 
 public class Graph {
@@ -148,21 +150,6 @@ public class Graph {
 
     public int getVerticesNumber(){
         return verticesNumber;
-    }
-
-    private int getEdgesNumber(int [][] a){
-        int sum = 0;
-        if (isDirected()){
-            for (int[] v : a)
-                for (int j = 0; j < a.length; j++)
-                    sum += v[j];
-        }
-        else
-            for (int i = 0; i < a.length - 1; i++)
-                for (int j = i; j < a.length; j++)
-                    sum += a[i][j];
-
-        return sum;
     }
 
     public String determineType(){
@@ -382,19 +369,17 @@ public class Graph {
         return false;
     }
 
-    private int[][] newIsomorphism(int [][] a ,int first, int sec) {
-        int [][] m = Utils.copyMatrix(a);
+    private void newIsomorphism(int first, int sec) {
         for (int i = 0; i < verticesNumber; i++){
-            int temp = m[first][i];
-            m[first][i] = m[sec][i];
-            m[sec][i] = temp;
+            int temp = adj[first][i];
+            adj[first][i] = adj[sec][i];
+            adj[sec][i] = temp;
         }
         for (int i = 0; i < verticesNumber; i++){
-            int temp = m[i][first];
-            m[i][first] = m[i][sec];
-            m[i][sec] = temp;
+            int temp = adj[i][first];
+            adj[i][first] = adj[i][sec];
+            adj[i][sec] = temp;
         }
-        return m;
     }
 
     public boolean isIsomorphic(Graph g){
@@ -403,7 +388,6 @@ public class Graph {
         if ((isConnected() && !g.isConnected()) || (g.isConnected() && !isConnected())) return false;
         if ((isCycle() && !g.isCycle()) || (g.isCycle() && !isCycle())) return false;
 
-//        if ((isBipartite() && !g.isBipartite()) || (g.isBipartite() && !isBipartite())) return false;
         if ((isCompleteBipartite() && !g.isCompleteBipartite()) ||
                 (g.isCompleteBipartite() && !isCompleteBipartite())) return false;
         if(!compareDegrees(g)) return false;
@@ -413,12 +397,13 @@ public class Graph {
     }
 
     private boolean checkMatrices(Graph g, int k) {
-        if (g.compareGraphs(adj)) return true;
+        if (this.compareGraph(g)) return true;
 
         for (int i = k; i < verticesNumber - 1; i++)
             for (int j = i + 1; j < verticesNumber; j++){
-                int [][] m = newIsomorphism(g.getAdj(), i, j);
-                if (checkMatrices(new Graph(m), k + 1)) return true;
+                Graph temp = new Graph(Utils.copyMatrix(g.adj));
+                temp.newIsomorphism(i, j);
+                if (checkMatrices(temp, k + 1)) return true;
             }
 
         return false;
@@ -461,10 +446,10 @@ public class Graph {
         return edges;
     }
 
-    public boolean compareGraphs(int[][] a) {
+    public boolean compareGraph(Graph g) {
         for (int i = 0; i < verticesNumber; i++)
             for (int j = 0; j < verticesNumber; j++)
-                if (a[i][j] != adj[i][j]) return false;
+                if (g.adj[i][j] != adj[i][j]) return false;
         return true;
     }
 
@@ -512,19 +497,19 @@ public class Graph {
         return false;
     }
 
-    public void printComponents(){
+    public ArrayList<ArrayList<Integer>> getComponents(){
+        ArrayList<ArrayList<Integer>> components = new ArrayList<>();
         boolean [] visited = new boolean[verticesNumber];
-        int count = 0;
         int x = 0;
         boolean all = true;
         while (all) {
-            String s = "";
+            ArrayList<Integer> component = new ArrayList<>();
             LinkedList<Integer> q = new LinkedList<>();
             visited[x] = true;
             q.add(x);
             while (q.size() != 0) {
                 int c = q.poll();
-                s += " " + c;
+                component.add(c);
                 for (int i = 0; i < verticesNumber; i++) {
                     if (adj[c][i] > 0 && !visited[i]) {
                         visited[i] = true;
@@ -532,8 +517,7 @@ public class Graph {
                     }
                 }
             }
-            System.out.println(s);
-            count++;
+            components.add(component);
             for (int i = 0; i < verticesNumber; i++)
                 if (!visited[i]) {
                     all = true;
@@ -543,12 +527,12 @@ public class Graph {
                 else
                     all = false;
         }
-        System.out.println(count + " components");
+        return components;
     }
 
-    private boolean containsCycle2(int [][] a){
-        if (containsLoop(a)) return true;
-        return getEdgesNumber(a) >= a.length;
+    private boolean containsCycle2(){
+        if (containsLoop(adj)) return true;
+        return getEdgesNumber() >= verticesNumber;
     }
 
     private boolean containsCycle(int [][] a){
@@ -584,72 +568,70 @@ public class Graph {
                 return allSpanning - spanningOfEdge;
             }
         }
-        return getRecursiveSpanningTree(Utils.copyMatrix(adj));
+        return getRecursiveSpanningTree();
     }
 
-    private int getRecursiveSpanningTree(int [][] a) {
-        if (isConnected(a)){
-            if (containsLoop(a)) {
-                int[][] t = removeLoops(Utils.copyMatrix(a));
-                if (!containsCycle2(t))
+    private int getRecursiveSpanningTree() {
+        if (isConnected()){
+            if (containsLoop()) {
+                Graph temp = new Graph(Utils.copyMatrix(adj));
+                temp.removeLoops();
+                if (!temp.containsCycle2())
                     return 1;
             }
-            if (!containsCycle2(a))
+            if (!containsCycle2())
                 return 1;
         }
         else return 0;
 
-        int [] v = chooseVertices(a);
-        int [][] b = edgeReduction(Utils.copyMatrix(a), v[0], v[1]);
-        int [][] c = edgeContraction(Utils.copyMatrix(a), v[0], v[1]);
+        int [] v = chooseVertices();
+        Graph first = new Graph(Utils.copyMatrix(adj));
+        Graph second = new Graph(Utils.copyMatrix(adj));
+        first.edgeReduction(v[0], v[1]);
+        second.edgeContraction(v[0], v[1]);
 
-        return getRecursiveSpanningTree(b) + getRecursiveSpanningTree(c);
+        return first.getRecursiveSpanningTree() + second.getRecursiveSpanningTree();
     }
 
-    private int[][] removeLoops(int[][] a) {
-        for (int i = 0; i < a.length; i++)
-            a[i][i] = 0;
-        return a;
+    private void removeLoops() {
+        for (int i = 0; i < adj.length; i++)
+            adj[i][i] = 0;
     }
 
-    private int[] chooseVertices(int[][] a) {
+    private int[] chooseVertices() {
         Random r = new Random();
         int f, l;
         do {
-            f = r.nextInt(a.length);
-            l = r.nextInt(a.length);
-        }while (a[f][l] == 0 || f == l);
+            f = r.nextInt(verticesNumber);
+            l = r.nextInt(verticesNumber);
+        }while (adj[f][l] == 0 || f == l);
         return new int[]{f, l};
     }
 
-    private int[][] edgeReduction(int[][] a, int f, int l) {
-        a[f][l] = a[f][l] - 1;
-        a[l][f] = a[l][f] - 1;
-        return a;
+    private void edgeReduction(int f, int l) {
+        adj[f][l] = adj[f][l] - 1;
+        adj[l][f] = adj[l][f] - 1;
     }
 
-    private int[][] edgeContraction(int [][] a, int f, int l){
-        int [][] b = new int[a.length - 1][a.length - 1];
-        edgeReduction(a, f, l);
-        for (int i = 0; i < a.length; i++)
-            a[f][i] += a[l][i];
-        for (int i = 0; i < a.length; i++)
-            a[i][f] += a[i][l];
+    private void edgeContraction(int f, int l){
+        edgeReduction(f, l);
+        for (int i = 0; i < verticesNumber; i++)
+            adj[f][i] += adj[l][i];
+        for (int i = 0; i < verticesNumber; i++)
+            adj[i][f] += adj[i][l];
 
         int row = 0;
-        for (int i = 0; i < a.length; i++) {
+        for (int i = 0; i < verticesNumber; i++) {
             if (i != l) {
                 int col = 0;
-                for (int j = 0; j < a.length; j++)
+                for (int j = 0; j < verticesNumber; j++)
                     if (j != l) {
-                        b[row][col] = a[i][j];
+                        adj[row][col] = adj[i][j];
                         col++;
                     }
                 row++;
             }
         }
-
-        return b;
     }
 
     public int getRadius(){
@@ -701,26 +683,6 @@ public class Graph {
                         c[i][j] = c[i][k] + c[k][j];
 
         return c;
-    }
-
-    private boolean isConnected(int [][] a){
-        LinkedList<Integer> q = new LinkedList<>();
-        boolean [] visited = new boolean[a.length];
-        visited[0] = true;
-        q.add(0);
-        while (q.size() != 0){
-            int c = q.poll();
-
-            for (int i = 0; i < a.length; i++){
-                if (a[c][i] > 0 && !visited[i]){
-                    visited[i] = true;
-                    q.add(i);
-                }
-            }
-        }
-        for (int i = 0; i < a.length; i++)
-            if (!visited[i]) return false;
-        return true;
     }
 
     public boolean isConnected(){

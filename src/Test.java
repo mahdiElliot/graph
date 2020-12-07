@@ -157,7 +157,7 @@ public class Test {
 //        System.out.println(g.determineType());
 //        System.out.println(g.isConnected());
 //        System.out.println(g.isDirected());
-//        g.printComponents();
+//        g.getComponents();
 //        System.out.println(g.getCenter());
 //        System.out.println(g.spanningTreesNumber());
 //        System.out.println(g.containsCycle(adj));
