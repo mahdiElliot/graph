@@ -180,7 +180,7 @@ public class Graph {
         if (isDirected()){
             if (verticesNumber == 2 && edgesNumber == 1 &&
                     ((adj[0][1] == 1 && adj[1][0] == 0) || (adj[0][1] == 0 && adj[1][0] == 1))) return true;
-            if (isSimple() && !containsCycle(adj)){
+            if (isSimple() && !containsCycle()){
                 int number = 0;
                 boolean end = false;
                 for (int i = 0; i < verticesNumber; i++){
@@ -194,7 +194,7 @@ public class Graph {
         }
         else {
             if (verticesNumber == 2 && edgesNumber == 1 && adj[0][1] == 1 && adj[1][0] == 1) return true;
-            if (isSimple() && isConnected() && !containsCycle(adj)){
+            if (isSimple() && isConnected() && !containsCycle()){
                 short numberOfEndpoints = 0;
                 for (int i = 0; i < verticesNumber; i++){
                     int d = getVertexDegree(i);
@@ -315,12 +315,6 @@ public class Graph {
         for (int i = 0; i < verticesNumber; i++)
             if (adj[i][i] != 0) return true;
 
-        return false;
-    }
-
-    private boolean containsLoop(int [][] a){
-        for (int i = 0; i < a.length; i++)
-            if (a[i][i] != 0) return true;
         return false;
     }
 
@@ -531,15 +525,15 @@ public class Graph {
     }
 
     private boolean containsCycle2(){
-        if (containsLoop(adj)) return true;
+        if (containsLoop()) return true;
         return getEdgesNumber() >= verticesNumber;
     }
 
-    private boolean containsCycle(int [][] a){
-        boolean [] visited = new boolean[a.length];
-        for (int v = 0; v < a.length; v++){
+    private boolean containsCycle(){
+        boolean [] visited = new boolean[verticesNumber];
+        for (int v = 0; v < verticesNumber; v++){
             if (!visited[v])
-                if (isCyclicUtil(v, visited, -1, a))
+                if (isCyclicUtil(v, visited, -1, adj))
                     return true;
         }
 
