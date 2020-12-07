@@ -533,19 +533,19 @@ public class Graph {
         boolean [] visited = new boolean[verticesNumber];
         for (int v = 0; v < verticesNumber; v++){
             if (!visited[v])
-                if (isCyclicUtil(v, visited, -1, adj))
+                if (isCyclicUtil(v, visited, -1))
                     return true;
         }
 
         return false;
     }
 
-    private boolean isCyclicUtil(int v, boolean[] visited, int p, int [][] a) {
+    private boolean isCyclicUtil(int v, boolean[] visited, int p) {
         visited[v] = true;
-        for (int u = 0; u < a.length; u++){
-            if (a[v][u] > 0 )
+        for (int u = 0; u < verticesNumber; u++){
+            if (adj[v][u] > 0 )
                 if (!visited[u]) {
-                    if (isCyclicUtil(u, visited, v, a))
+                    if (isCyclicUtil(u, visited, v))
                         return true;
                 } else if (u != p) return true;
         }
