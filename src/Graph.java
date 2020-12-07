@@ -34,10 +34,29 @@ public class Graph {
             this.adj = adj;
             verticesNumber = adj.length;
             bipartiteColor = new boolean[verticesNumber];
-            edgesNumber = getEdgesNumber();
+            setEdgesNumber();
         }
         else
             throw new Exception("row and column must be at the same size");
+    }
+
+    private void setEdgesNumber() {
+        int sum = 0;
+        if (isDirected()){
+            for (int i = 0; i < verticesNumber; i++)
+                for (int j = 0; j < verticesNumber; j++)
+                    sum += adj[i][j];
+        }
+        else
+            for (int i = 0; i < verticesNumber - 1; i++)
+                for (int j = i; j < verticesNumber; j++)
+                    sum += adj[i][j];
+
+        this.edgesNumber = sum;
+    }
+
+    public int getEdgesNumber(){
+        return edgesNumber;
     }
 
     public int[][] getAdj() {
@@ -88,14 +107,37 @@ public class Graph {
 
     public void addEdge(int u, int v, boolean directed){
         if (!directed) addEdge(u, v);
-        else adj[u][v]++;
+        else {
+            adj[u][v]++;
+            edgesNumber++;
+        }
     }
 
     public void addEdge(int u, int v){
         adj[u][v]++;
         adj[v][u]++;
+        edgesNumber++;
     }
 
+    public boolean removeEdge(int u, int v, boolean directed) {
+        if (!directed) return removeEdge(u, v);
+        else if (adj[u][v] > 0) {
+            adj[u][v]--;
+            edgesNumber--;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean removeEdge(int u, int v){
+        if (adj[u][v] > 0) {
+            adj[u][v]--;
+            adj[v][u]--;
+            edgesNumber--;
+            return true;
+        }
+        return false;
+    }
 
     public boolean isSimple() {
         for (int i = 0; i < verticesNumber; i++)
@@ -106,21 +148,6 @@ public class Graph {
 
     public int getVerticesNumber(){
         return verticesNumber;
-    }
-
-    public int getEdgesNumber(){
-        int sum = 0;
-        if (isDirected()){
-            for (int i = 0; i < verticesNumber; i++)
-                for (int j = 0; j < verticesNumber; j++)
-                    sum += adj[i][j];
-        }
-        else
-            for (int i = 0; i < verticesNumber - 1; i++)
-                for (int j = i; j < verticesNumber; j++)
-                    sum += adj[i][j];
-
-        return sum;
     }
 
     private int getEdgesNumber(int [][] a){
@@ -161,7 +188,6 @@ public class Graph {
         return s;
     }
 
-
     private boolean isPath(){
         if (verticesNumber == 1 && edgesNumber == 0) return true;
         if (isDirected()){
@@ -171,7 +197,7 @@ public class Graph {
                 int number = 0;
                 boolean end = false;
                 for (int i = 0; i < verticesNumber; i++){
-                    int d = getVertexDeg(i);
+                    int d = getVertexDegree(i);
                     if (d == 1) number++;
                     else if (d == 0) end = true;
                     else return false;
@@ -184,7 +210,7 @@ public class Graph {
             if (isSimple() && isConnected() && !containsCycle(adj)){
                 short numberOfEndpoints = 0;
                 for (int i = 0; i < verticesNumber; i++){
-                    int d = getVertexDeg(i);
+                    int d = getVertexDegree(i);
                     if (d == 1)
                         numberOfEndpoints++;
                     else if (d > 2)
@@ -196,7 +222,6 @@ public class Graph {
         }
         return false;
     }
-
 
     public boolean isDirected(){
         for (int i = 0; i < verticesNumber - 1; i++)
@@ -347,35 +372,14 @@ public class Graph {
             if (verticesNumber == 4) return isComplete();
             boolean center = false;
             for (int i = 0; i < verticesNumber; i++)
-                if (getVertexDeg(i) == verticesNumber - 1)
+                if (getVertexDegree(i) == verticesNumber - 1)
                     if (!center) center = true; else return false;
-                else if (getVertexDeg(i) != 3) return false;
+                else if (getVertexDegree(i) != 3) return false;
 
             return center;
         }
 
         return false;
-    }
-
-    private boolean isWheel(int [][] m) {
-        //one element before last
-        if (m[0][verticesNumber - 2] != 1) return false;
-        if (m[verticesNumber - 2][0] != 1) return false;
-
-        //upper diagonal
-        for (int i = 0; i < verticesNumber - 1; i++)
-            if (m[i][i+1] != 1) return false;
-
-        //lower diagonal
-        for (int i = 1; i < verticesNumber; i++)
-            if (m[i][i-1] != 1) return false;
-
-        //last row and column
-        for (int i = 0; i < verticesNumber - 1; i++)
-            if (m[i][verticesNumber - 1] != 1 && m[verticesNumber - 1][i] != 1)
-                return false;
-
-        return true;
     }
 
     private int[][] newIsomorphism(int [][] a ,int first, int sec) {
@@ -425,8 +429,8 @@ public class Graph {
         HashMap<Integer, Integer> h2 = new HashMap<>();
 
         for (int i = 0; i < verticesNumber; i++){
-            int d = getVertexDeg(i);
-            int d2 = g.getVertexDeg(i);
+            int d = getVertexDegree(i);
+            int d2 = g.getVertexDegree(i);
             if (h.containsKey(d))
                 h.replace(d, h.get(d) + 1);
             else
@@ -446,7 +450,7 @@ public class Graph {
         return true;
     }
 
-    private Set<Edge> edgeSet(){
+    public Set<Edge> edgeSet(){
         Set<Edge> edges = new HashSet<>();
         for (int i = 0; i < verticesNumber; i++)
             for (int j = 0; j < verticesNumber; j++)
@@ -470,7 +474,7 @@ public class Graph {
             if (verticesNumber == 2 && edgesNumber == 2 && adj[0][1] == 1 && adj[1][0] == 1) return true;
             if (isSimple()){
                 for (int i = 0; i < verticesNumber; i++)
-                    if (getVertexDeg(i) != 1)
+                    if (getVertexDegree(i) != 1)
                         return false;
                 return true;
             }
@@ -479,7 +483,7 @@ public class Graph {
             if (verticesNumber == 2 && edgesNumber == 2 && adj[0][1] == 2 && adj[1][0] == 2) return true;
             if (isSimple() && isConnected()) {
                 for (int i = 0; i < verticesNumber; i++)
-                    if (getVertexDeg(i) != 2)
+                    if (getVertexDegree(i) != 2)
                         return false;
                 return true;
             }
@@ -490,7 +494,7 @@ public class Graph {
     private boolean isComplete() {
         if (isSimple()) {
             for (int i = 0; i < verticesNumber; i++)
-                if (getVertexDeg(i) != verticesNumber - 1)
+                if (getVertexDegree(i) != verticesNumber - 1)
                     return false;
             return true;
         }
@@ -499,9 +503,9 @@ public class Graph {
 
     private boolean isRegular() {
         if (isSimple()) {
-            int deg = getVertexDeg(0);
+            int deg = getVertexDegree(0);
             for (int i = 1; i < verticesNumber; i++)
-                if (deg != getVertexDeg(i))
+                if (deg != getVertexDegree(i))
                     return false;
             return true;
         }
@@ -739,7 +743,7 @@ public class Graph {
         return true;
     }
 
-    public int getVertexDeg(int vertex) {
+    public int getVertexDegree(int vertex) {
         int sum = 0;
         for (int i = 0 ; i < verticesNumber; i++)
             sum += adj[i][vertex];
@@ -753,6 +757,49 @@ public class Graph {
         return true;
     }
 
+    public ArrayList<Edge> eulerianWalk(){
+        short numberOfOddVertices = 0;
+        int chosenVertex = 0;
+        for (int i = 0; i < verticesNumber; i++) {
+            if (numberOfOddVertices > 2){
+                System.out.println("not eulerian");
+                return new ArrayList<>();
+            }
+            if (getVertexDegree(i) % 2 == 1) {
+                chosenVertex = i;
+                numberOfOddVertices++;
+            }
+        }
+
+        Graph newGraph = new Graph(Utils.copyMatrix(adj));
+        ArrayList<Edge> edgeSequence = new ArrayList<>();
+
+        while (newGraph.edgesNumber > 0) {
+            boolean cutEdge = true;
+            int dest = -1;
+            for (int i = 0; i < verticesNumber; i++) {
+                Graph temp = new Graph(Utils.copyMatrix(newGraph.adj));
+                if (temp.removeEdge(chosenVertex, i)){
+                    if (temp.isConnected()){
+                        newGraph = temp;
+                        Edge edge = new Edge(chosenVertex, i);
+                        edgeSequence.add(edge);
+                        chosenVertex = i;
+                        cutEdge = false;
+                        break;
+                    } else if (!temp.isConnected()) dest = i;
+                }
+            }
+            if (cutEdge && dest != -1) {
+                newGraph.removeEdge(chosenVertex, dest);
+                Edge edge = new Edge(chosenVertex, dest);
+                edgeSequence.add(edge);
+                chosenVertex = dest;
+            }
+        }
+        return edgeSequence;
+    }
+
     public int maxMatchingNumber(){ //alpha prime
         if (isPath() || isCycle() || (verticesNumber % 2 == 0 && isComplete()))
             return verticesNumber / 2;
@@ -764,16 +811,17 @@ public class Graph {
 
         ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < verticesNumber; i++)
-            if (getVertexDeg(i) == 0) indices.add(i);
+            if (getVertexDegree(i) == 0) indices.add(i);
         if (!indices.isEmpty()) {
-            Graph g = removeSingleVertices(indices);
+            Graph g = new Graph(Utils.copyMatrix(adj));
+            g.removeSingleVertices(indices);
             return g.verticesNumber - g.minEdgeCover();
         }
 
         return verticesNumber - minEdgeCover();
     }
 
-    private Graph removeSingleVertices(ArrayList<Integer> indices) {
+    private void removeSingleVertices(ArrayList<Integer> indices) {
         int l = verticesNumber - indices.size();
         int [][] a = new int[l][l];
         int count = 0;
@@ -794,16 +842,16 @@ public class Graph {
 
             count++;
         }
-        return new Graph(a);
+        adj = a;
+        verticesNumber = adj.length;
     }
-
 
     public int minEdgeCover(){ //beta prime
         for (int i = 0; i < verticesNumber; i++)
-            if (getVertexDeg(i) == 0) return 0;
+            if (getVertexDegree(i) == 0) return 0;
 
         ArrayList<Edge> edges = new ArrayList<>(edgeSet());
-        ArrayList<ArrayList<Edge>> subsets = Utils.subsets(edges, 1);
+        ArrayList<ArrayList<Edge>> subsets = Utils.subsets(edges, 2);
         for (ArrayList<Edge> es: subsets){
             boolean [] check = new boolean[verticesNumber];
             for (Edge e: es){
@@ -822,13 +870,14 @@ public class Graph {
         }
         return 1;
     }
+
     public int maxIndependentSet(){ //alpha
         if (isComplete())
             return 1;
         if (isPath() || isCycle() || isCompleteBipartite())
             return verticesNumber / 2;
 
-        ArrayList<ArrayList<Integer>> subsets = Utils.subsets(verticesNumber, 1);
+        ArrayList<ArrayList<Integer>> subsets = Utils.subsets(verticesNumber, 2);
         int max = 1;
         for (ArrayList<Integer> s : subsets){
             boolean isIndependent = true;
@@ -849,5 +898,14 @@ public class Graph {
 
     public int minVertexCover(){ //beta
         return verticesNumber - maxIndependentSet();
+    }
+
+    @Override
+    public String toString() {
+        return "Graph{" +
+                "adj=" + Arrays.toString(adj) +
+                ", verticesNumber=" + verticesNumber +
+                ", edgesNumber=" + edgesNumber +
+                '}';
     }
 }

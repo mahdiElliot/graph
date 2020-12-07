@@ -59,7 +59,7 @@ public final class Utils {
                 if ((i & (1 << j)) > 0)
                     a.add(j);
 
-            if (a.size() > filterSubsetSize)  arr.add(a);
+            if (a.size() >= filterSubsetSize)  arr.add(a);
         }
         return arr;
     }
@@ -73,7 +73,7 @@ public final class Utils {
                 if ((i & (1 << j)) > 0)
                     s.add(set.get(j));
 
-            if (s.size() > filterSubsetSize) arr.add(s);
+            if (s.size() >= filterSubsetSize) arr.add(s);
         }
 
         return arr;

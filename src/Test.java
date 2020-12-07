@@ -113,13 +113,13 @@ public class Test {
 //                {1, 1, 0}
 //        };
 
-        int [][] adj = {
-                {0, 1, 0, 0, 1},
-                {1, 0, 1, 0, 0},
-                {0, 1, 0, 1, 1},
-                {0, 0, 1, 0, 1},
-                {1, 0, 1, 1, 0}
-        };
+//        int [][] adj = {
+//                {0, 1, 0, 0, 1},
+//                {1, 0, 1, 0, 0},
+//                {0, 1, 0, 1, 1},
+//                {0, 0, 1, 0, 1},
+//                {1, 0, 1, 1, 0}
+//        };
 
 //        int [][] adj = {
 //                /*a1*/{0, 1, 1, 0, 0, 0},
@@ -129,6 +129,16 @@ public class Test {
 //                /*a5*/{0, 0, 0, 1, 0, 0},
 //                /*a6*/{0, 0, 0, 0, 0, 0},
 //        };
+
+        int [][] adj = {
+                {0, 1, 0, 0, 0, 1, 0},
+                {1, 0, 1, 0, 0, 1, 1},
+                {0, 1, 0, 1, 1, 0, 1},
+                {0, 0, 1, 0, 1, 0, 0},
+                {0, 0, 1, 1, 0, 1, 1},
+                {1, 1, 0, 0, 1, 0, 1},
+                {0, 1, 1, 0, 1, 1, 0}
+        };
 
         int [][] adj2 = {
                 {0, 0, 0, 1},
@@ -142,7 +152,7 @@ public class Test {
 //        System.out.println(g.isDirected());
 //        System.out.println(g.maxIndependentSet());
 //        System.out.println(g.minEdgeCover());
-        System.out.println(g.maxMatchingNumber());
+//        System.out.println(g.maxMatchingNumber());
 //        Utils.printMatrix(g.getIncidentMatrix());
 //        System.out.println(g.determineType());
 //        System.out.println(g.isConnected());
@@ -153,6 +163,8 @@ public class Test {
 //        System.out.println(g.containsCycle(adj));
 //        System.out.println(g.isIsomorphic(g2));
 //        g.printCycles();
+
+        System.out.println(g.eulerianWalk());
     }
 }
 
