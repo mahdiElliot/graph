@@ -1,3 +1,7 @@
+import utils.ArrayList2;
+import utils.Edge;
+import utils.Utils;
+
 import java.util.*;
 
 public class Graph {
@@ -804,8 +808,9 @@ public class Graph {
         for (int i = 0; i < verticesNumber; i++)
             if (getVertexDegree(i) == 0) return 0;
 
-        ArrayList<Edge> edges = new ArrayList<>(edgeSet());
-        ArrayList<ArrayList<Edge>> subsets = Utils.subsets(edges, 2);
+        ArrayList2<Edge> edges = new ArrayList2<>(edgeSet());
+
+        ArrayList<ArrayList<Edge>> subsets = edges.subsets(1);
         for (ArrayList<Edge> es: subsets){
             boolean [] check = new boolean[verticesNumber];
             for (Edge e: es){
@@ -852,6 +857,28 @@ public class Graph {
 
     public int minVertexCover(){ //beta
         return verticesNumber - maxIndependentSet();
+    }
+
+
+    public boolean checkHall(boolean partSet){
+        if (isBipartite()){
+            Set<Integer> vertices = new HashSet<>();
+            for (int i = 0; i < verticesNumber; i++)
+                if (bipartiteColor[i] == partSet) vertices.add(i);
+
+            ArrayList2<Integer> vs = new ArrayList2<>(vertices);
+
+            for (ArrayList<Integer> s: vs.subsets(0)) {
+                Set<Integer> u = new HashSet<>();
+                for (int v : s)
+                    for (int i = 0; i < verticesNumber; i++)
+                        if (adj[v][i] > 0) u.add(i);
+
+                if (u.size() < s.size()) return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

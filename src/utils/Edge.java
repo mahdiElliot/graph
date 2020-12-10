@@ -1,4 +1,4 @@
-import java.util.Objects;
+package utils;
 
 public class Edge {
     private final int first;

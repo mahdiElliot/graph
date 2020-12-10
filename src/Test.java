@@ -130,14 +130,21 @@ public class Test {
 //                /*a6*/{0, 0, 0, 0, 0, 0},
 //        };
 
+//        int [][] adj = {
+//                {0, 1, 0, 0, 0, 1, 0},
+//                {1, 0, 1, 0, 0, 1, 1},
+//                {0, 1, 0, 1, 1, 0, 1},
+//                {0, 0, 1, 0, 1, 0, 0},
+//                {0, 0, 1, 1, 0, 1, 1},
+//                {1, 1, 0, 0, 1, 0, 1},
+//                {0, 1, 1, 0, 1, 1, 0}
+//        };
+
         int [][] adj = {
-                {0, 1, 0, 0, 0, 1, 0},
-                {1, 0, 1, 0, 0, 1, 1},
-                {0, 1, 0, 1, 1, 0, 1},
-                {0, 0, 1, 0, 1, 0, 0},
-                {0, 0, 1, 1, 0, 1, 1},
-                {1, 1, 0, 0, 1, 0, 1},
-                {0, 1, 1, 0, 1, 1, 0}
+                {0, 1, 0, 1},
+                {1, 0, 1, 0},
+                {0, 1, 0, 1},
+                {1, 0, 1, 0}
         };
 
         int [][] adj2 = {
@@ -153,7 +160,7 @@ public class Test {
 //        System.out.println(g.maxIndependentSet());
 //        System.out.println(g.minEdgeCover());
 //        System.out.println(g.maxMatchingNumber());
-//        Utils.printMatrix(g.getIncidentMatrix());
+//        utils.Utils.printMatrix(g.getIncidentMatrix());
 //        System.out.println(g.determineType());
 //        System.out.println(g.isConnected());
 //        System.out.println(g.isDirected());
@@ -164,7 +171,9 @@ public class Test {
 //        System.out.println(g.isIsomorphic(g2));
 //        g.printCycles();
 
-        System.out.println(g.eulerianWalk());
+//        System.out.println(g.eulerianWalk());
+
+        System.out.println(g.checkHall(true));
     }
 }
 
