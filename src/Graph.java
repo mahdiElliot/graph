@@ -860,7 +860,7 @@ public class Graph {
     }
 
 
-    public boolean checkHall(boolean partSet){
+    public boolean checkHall(boolean partSet, boolean [] bipartiteColor){
         if (isBipartite()){
             Set<Integer> vertices = new HashSet<>();
             for (int i = 0; i < verticesNumber; i++)

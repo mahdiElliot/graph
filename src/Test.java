@@ -173,7 +173,8 @@ public class Test {
 
 //        System.out.println(g.eulerianWalk());
 
-        System.out.println(g.checkHall(true));
+        boolean [] bipartiteColor = {true, false, true, false};
+        System.out.println(g.checkHall(true, bipartiteColor));
     }
 }
 
