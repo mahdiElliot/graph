@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public final class Utils {
-    public static void printMatrix(int[][] m) {
+    public static void printMatrix(double[][] m) {
         String s = "";
         for (int i = 0; i < m.length; i++) {
             for (int j = 0; j < m[i].length; j++)
@@ -24,7 +24,7 @@ public final class Utils {
             return b;
     }
 
-    public static void printArray(int [] arr){
+    public static void printArray(double [] arr){
         String s = arr[0] + "";
         for (int i = 1; i < arr.length; i++)
            s += " " + arr[i];
@@ -80,18 +80,12 @@ public final class Utils {
         return arr;
     }
 
-//    static ArrayList<ArrayList<Integer>> subsets(ArrayList<Integer> set, int filterSubsetSize){
-//        ArrayList<ArrayList<Integer>> arr = new ArrayList<>();
-//        int n = set.size();
-//        for (int i = 0; i < (1 << n); i++){
-//            ArrayList<Integer> s = new ArrayList<>();
-//            for (int j = 0; j < n; j++)
-//                if ((i & (1 << j)) > 0)
-//                    s.add(set.get(j));
-//
-//            if (s.size() >= filterSubsetSize) arr.add(s);
-//        }
-//
-//        return arr;
-//    }
+    public static double[][] convertIntMatrixToDouble(int[][] matrix){
+        double[][] m = new double[matrix.length][matrix[0].length];
+        for (int i = 0; i < matrix.length; i++)
+            for (int j = 0; j < matrix[i].length; j++)
+                m[i][j] = matrix[i][j];
+
+        return m;
+    }
 }

@@ -1,3 +1,6 @@
+import Jama.EigenvalueDecomposition;
+import Jama.Matrix;
+import org.jetbrains.annotations.NotNull;
 import utils.ArrayList2;
 import utils.Edge;
 import utils.Utils;
@@ -33,7 +36,7 @@ public class Graph {
         }
     }
 
-    public void setAdj(int [][] adj) throws Exception {
+    public void setAdj(int [] @NotNull [] adj) throws Exception {
         if (adj.length == adj[0].length){
             this.adj = adj;
             verticesNumber = adj.length;
@@ -306,7 +309,7 @@ public class Graph {
         color[u] = 2;
     }
 
-    private boolean checkCycleExists(ArrayList<ArrayList<Integer>> cycles, ArrayList<Integer> c) {
+    private boolean checkCycleExists(@NotNull ArrayList<ArrayList<Integer>> cycles, ArrayList<Integer> c) {
         for (ArrayList<Integer> cycle : cycles)
             if (Utils.compareLists(cycle, c))
                 return true;
@@ -378,7 +381,7 @@ public class Graph {
         }
     }
 
-    public boolean isIsomorphic(Graph g){
+    public boolean isIsomorphic(@NotNull Graph g){
         if (g.verticesNumber != verticesNumber || g.edgesNumber != edgesNumber) return false;
         if ((isSimple() && !g.isSimple()) || (g.isSimple() && !isSimple())) return false;
         if ((isConnected() && !g.isConnected()) || (g.isConnected() && !isConnected())) return false;
@@ -879,6 +882,74 @@ public class Graph {
             return true;
         }
         return false;
+    }
+
+    private double[] getEigenValues(int[][] m){
+        double[][] temp = Utils.convertIntMatrixToDouble(m);
+        Matrix matrix = new Matrix(temp);
+        EigenvalueDecomposition eigenvalueDecomposition = new EigenvalueDecomposition(matrix);
+        double[] eigenValues = eigenvalueDecomposition.getRealEigenvalues();
+        return Arrays.stream(eigenValues).map(Math::round).toArray();
+    }
+
+    //determine bipartite using eigen values and eigen vectors. doesn't work for some graphs
+    public boolean isBipartite2(){
+        double[][] temp = Utils.convertIntMatrixToDouble(adj);
+        Matrix matrix = new Matrix(temp);
+        EigenvalueDecomposition eigenvalueDecomposition = new EigenvalueDecomposition(matrix);
+        double[] eigenValues = eigenvalueDecomposition.getRealEigenvalues();
+        double[] roundedEigenValues = Arrays.stream(eigenValues).map(Math::round).toArray();
+        boolean symmetriesExist = false;
+        for (int i = 0; i < roundedEigenValues.length; i++) {
+            if (symmetriesExist) break;
+            for (int j = i + 1; j < roundedEigenValues.length; j++)
+                if ((int) roundedEigenValues[i] == (int) -roundedEigenValues[j]) {
+                    symmetriesExist = true;
+                    break;
+                }
+        }
+
+        if (symmetriesExist) {
+            Matrix eigenVectors = eigenvalueDecomposition.getV();
+            double[] secondEigenVector = eigenVectors.getArray()[1];
+            for (int i = 0; i < secondEigenVector.length; i++)
+                bipartiteColor[i] = secondEigenVector[i] >= 0;
+            return true;
+        }
+        return false;
+    }
+
+    private int[][] getLaplacian(){
+        int [][] laplacian = new int[verticesNumber][verticesNumber];
+        for (int i = 0; i < verticesNumber; i++)
+            for (int j = 0; j < verticesNumber; j++)
+                if (i == j) laplacian[i][j] = adj[i][j];
+                else if (adj[i][j] > 0) laplacian[i][j] = -1;
+
+        return laplacian;
+    }
+
+    //get number of components using eigen values. gives approximate answer for some graphs
+    public int numberOfComponents(){
+        int[][] laplacian = getLaplacian();
+        double[] roundedEigenValues = getEigenValues(laplacian);
+        int count = 0;
+        for (double r : roundedEigenValues)
+            if (r == 0) count++;
+        if (count == 0) count = 1;
+        return count;
+    }
+
+    //determine whether two graphs are not isomorphic using eigen values. it doesn't certainly determine if they are isomorphic
+    //two graphs that have different eigenvalues cannot possibly be isomorphic
+    public boolean isIsomorphic2(@NotNull Graph graph){
+        double[] roundedEigenValues = getEigenValues(adj);
+        double[] roundedEigenValues2 = getEigenValues(graph.adj);
+        for (int i = 0; i < roundedEigenValues.length; i++)
+            if (roundedEigenValues[i] != roundedEigenValues2[i])
+                return false;
+        System.out.println("may be isomorphic");
+        return true;
     }
 
     @Override
