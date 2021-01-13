@@ -900,18 +900,22 @@ public class Graph {
         double[] eigenValues = eigenvalueDecomposition.getRealEigenvalues();
         double[] roundedEigenValues = Arrays.stream(eigenValues).map(Math::round).toArray();
         boolean symmetriesExist = false;
+        int negativeOne = 0;
         for (int i = 0; i < roundedEigenValues.length; i++) {
             if (symmetriesExist) break;
             for (int j = i + 1; j < roundedEigenValues.length; j++)
                 if ((int) roundedEigenValues[i] == (int) -roundedEigenValues[j]) {
+                    if (roundedEigenValues[i] < 0) negativeOne = i;
+                    else negativeOne = j;
+
                     symmetriesExist = true;
                     break;
                 }
         }
 
         if (symmetriesExist) {
-            Matrix eigenVectors = eigenvalueDecomposition.getV();
-            double[] secondEigenVector = eigenVectors.getArray()[1];
+            Matrix eigenVectors = eigenvalueDecomposition.getV().inverse();
+            double[] secondEigenVector = eigenVectors.getArray()[negativeOne];
             for (int i = 0; i < secondEigenVector.length; i++)
                 bipartiteColor[i] = secondEigenVector[i] >= 0;
             return true;
