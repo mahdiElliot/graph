@@ -938,7 +938,6 @@ public class Graph {
         return laplacian;
     }
 
-    //get number of components using eigen values. gives approximate answer for some graphs
     public int numberOfComponents(){
         int[][] laplacian = getLaplacian();
         double[] roundedEigenValues = getEigenValues(laplacian);
