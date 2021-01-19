@@ -115,13 +115,13 @@ public class Test {
 //                {1, 1, 0}
 //        };
 
-//        int [][] adj = {
-//                {0, 1, 0, 0, 1},
-//                {1, 0, 1, 0, 0},
-//                {0, 1, 0, 1, 1},
-//                {0, 0, 1, 0, 1},
-//                {1, 0, 1, 1, 0}
-//        };
+        int [][] adj = {
+                {0, 1, 0, 0, 1},
+                {1, 0, 1, 0, 0},
+                {0, 1, 0, 1, 1},
+                {0, 0, 1, 0, 1},
+                {1, 0, 1, 1, 0}
+        };
 
 //        int [][] adj = {
 //                /*a1*/{0, 1, 1, 0, 0, 0},
@@ -142,12 +142,12 @@ public class Test {
 //                {0, 1, 1, 0, 1, 1, 0}
 //        };
 
-        int [][] adj = {
-                {0, 1, 0, 1},
-                {1, 0, 1, 0},
-                {0, 1, 0, 1},
-                {1, 0, 1, 0}
-        };
+//        int [][] adj = {
+//                {0, 1, 0, 1},
+//                {1, 0, 1, 0},
+//                {0, 1, 0, 1},
+//                {1, 0, 1, 0}
+//        };
 
 //        int [][] adj = {
 //                {0, 1},
@@ -188,8 +188,8 @@ public class Test {
 
 //        boolean [] bipartiteColor = {true, false, true, false};
 //        System.out.println(g.checkHall(true, bipartiteColor));
-        System.out.println(g.isBipartite2());
-//        System.out.println(g.numberOfComponents());
+//        System.out.println(g.isBipartite2());
+        System.out.println(g.numberOfComponents());
 //        System.out.println(g.isIsomorphic2(g2));
     }
 }

@@ -925,9 +925,14 @@ public class Graph {
 
     private int[][] getLaplacian(){
         int [][] laplacian = new int[verticesNumber][verticesNumber];
+        int [][] diagonal = new int[verticesNumber][verticesNumber];
+
+        for (int i = 0; i < verticesNumber; i++)
+                diagonal[i][i] = getVertexDegree(i);
+
         for (int i = 0; i < verticesNumber; i++)
             for (int j = 0; j < verticesNumber; j++)
-                if (i == j) laplacian[i][j] = adj[i][j];
+                if (i == j) laplacian[i][j] = diagonal[i][j];
                 else if (adj[i][j] > 0) laplacian[i][j] = -1;
 
         return laplacian;
@@ -940,7 +945,6 @@ public class Graph {
         int count = 0;
         for (double r : roundedEigenValues)
             if (r == 0) count++;
-        if (count == 0) count = 1;
         return count;
     }
 
